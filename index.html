@@ -27,6 +27,17 @@
       border-bottom:1px solid #e9ecef;
       background:#fff;
     }
+    .logo{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .logo img{
+      height:52px;
+      width:auto;
+      display:block;
+    }
     .header h1{font-size:22px;font-weight:800;margin-bottom:6px}
     .header p{font-size:13px;color:#636e72}
 
@@ -198,6 +209,7 @@
       border-radius:14px;
       padding:14px;
       background:#fff;
+      text-align:left;
     }
     .summary-row{
       display:flex;justify-content:space-between;gap:12px;
@@ -220,6 +232,9 @@
 <body>
   <div class="container">
     <div class="header">
+      <div class="logo">
+        <img src="https://dcash.africa/logo.svg" alt="DCash Logo" loading="lazy">
+      </div>
       <h1>PAYMENT FOLLOW-UP</h1>
       <p>Step through the form to confirm payment and upload proof.</p>
     </div>
@@ -346,7 +361,8 @@
   </div>
 
   <script>
-    // ✅ Webhook URL (same as you requested)
+    // ✅ IMPORTANT: remove spaces from webhook URL (spaces break fetch)
+    // Change this to your real n8n webhook path, e.g. /webhook/payment-upload
     const WEBHOOK_URL = "https://l3j2qk3a.rcsrv.net/webhook/payment upload";
 
     // ✅ Demo data (replace with your real subscriber list)
@@ -410,19 +426,16 @@
 
     // --- Helpers
     function setStep(step){
-      // badges
       [badge1,badge2,badge3].forEach(b=>b.classList.remove("active"));
       if(step===1) badge1.classList.add("active");
       if(step===2) badge2.classList.add("active");
       if(step===3) badge3.classList.add("active");
 
-      // pages
       [page1,page2,page3].forEach(p=>p.classList.remove("active"));
       if(step===1) page1.classList.add("active");
       if(step===2) page2.classList.add("active");
       if(step===3) page3.classList.add("active");
 
-      // errors
       p1Err.style.display="none";
       p2Err.style.display="none";
       p3Err.style.display="none";
@@ -466,15 +479,17 @@
       renderNameList(nameSearch.value);
       nameList.classList.add("show");
     });
+
     nameSearch.addEventListener("input", ()=>{
       renderNameList(nameSearch.value);
       nameList.classList.add("show");
       // require click selection
       toPage2.disabled = !(chosenPerson && selectedName.value === chosenPerson.name);
     });
+
     document.addEventListener("click", (e)=>{
       const picker = nameSearch.closest(".picker");
-      if(!picker.contains(e.target)) nameList.classList.remove("show");
+      if(picker && !picker.contains(e.target)) nameList.classList.remove("show");
     });
 
     function renderSubscriptions(subs){
@@ -575,7 +590,6 @@
           return;
         }
 
-        // Build confirmation summary
         summaryBox.innerHTML = `
           <div class="summary-row"><span>Name</span><span>${escapeHtml(clientName.value)}</span></div>
           <div class="summary-row"><span>Reference</span><span>${escapeHtml(clientRef.value || "—")}</span></div>
@@ -603,7 +617,6 @@
       refInput.value = "";
       toPage2.disabled = true;
 
-      // reset page2 form
       paymentForm.reset();
       subsContainer.innerHTML = "";
       amountShown.value = "";
